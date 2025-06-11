@@ -1,0 +1,212 @@
+﻿body {
+    font-size: 12px !important;
+}
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.btn-cargarAchivo {
+    color: #ffffff;
+    background-color: #24a497;
+    border-color: #8e9594;
+    border-radius: 5px;
+    padding: 2px 5px !important;
+}
+
+    .btn-cargarAchivo:hover,
+    .btn-cargarAchivo:focus,
+    .btn-cargarAchivo:active,
+    .btn-cargarAchivo.active,
+    .open .dropdown-toggle.btn-cargarAchivo {
+        color: #ffffff;
+        background-color: #575555;
+        border-color: #333;
+    }
+
+
+.btn-cincopasitos-danger {
+    color: #ffffff;
+    background-color: #de5252;
+    border-color: #8e9594;
+    border-radius: 15px;
+}
+
+.btn-cincopasitos {
+    color: #ffffff;
+    background-color: #24a497;
+    border-color: #8e9594;
+    border-radius: 15px;
+}
+
+    .btn-cincopasitos:hover,
+    .btn-cincopasitos:focus,
+    .btn-cincopasitos:active,
+    .btn-cincopasitos.active,
+    .open .dropdown-toggle.btn-cincopasitos {
+        color: #ffffff;
+        background-color: #575555;
+        border-color: #333;
+    }
+
+.btn-cincopasitos-danger:hover,
+.btn-cincopasitos-danger:focus,
+.btn-cincopasitos-danger:active,
+.btn-cincopasitos-danger.active,
+.open .dropdown-toggle.btn-cincopasitos-danger {
+    color: #ffffff;
+    background-color: #f64e4e;
+    border-color: #333;
+}
+
+.btn-cincopasitos:active,
+.btn-cincopasitos.active,
+.open .dropdown-toggle.btn-cincopasitos {
+    background-image: none;
+}
+
+.btn-cincopasitos.disabled,
+.btn-cincopasitos[disabled],
+fieldset[disabled] .btn-cincopasitos,
+.btn-cincopasitos.disabled:hover,
+.btn-cincopasitos[disabled]:hover,
+fieldset[disabled] .btn-cincopasitos:hover,
+.btn-cincopasitos.disabled:focus,
+.btn-cincopasitos[disabled]:focus,
+fieldset[disabled] .btn-cincopasitos:focus,
+.btn-cincopasitos.disabled:active,
+.btn-cincopasitos[disabled]:active,
+fieldset[disabled] .btn-cincopasitos:active,
+.btn-cincopasitos.disabled.active,
+.btn-cincopasitos[disabled].active,
+fieldset[disabled] .btn-cincopasitos.active {
+    background-color: #333333;
+    border-color: #333;
+}
+
+.btn-cincopasitos .badge {
+    color: #ffffff;
+    background-color: #333333;
+}
+
+/* Paste this css to your style sheet file or under head tag */
+/* This only works with JavaScript, 
+if it's not present, don't show loader */
+.no-js #loader {
+    display: none;
+}
+
+.js #loader {
+    display: block;
+    position: absolute;
+    left: 100px;
+    top: 0;
+}
+
+.se-pre-con {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: url(../img/preloader.gif) center no-repeat #fff;
+    background-size: 250px;
+    opacity: 0.5;
+    background-color: #fff;
+}
+
+.porcentajeCarga {
+    position: absolute;
+    top: 93%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.icono-grid {
+    color: #222d32;
+    cursor: pointer;
+    font-size: 21px;
+    font-weight: bolder;
+    padding: 0px !important;
+}
+
+    .icono-grid:hover {
+        color: #25a0da;
+    }
+
+.icono-grid2 {
+    color: #222d32;
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: bolder;
+    padding: 0px !important;
+}
+
+    .icono-grid2:hover {
+        color: #25a0da;
+    }
+
+.pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus {
+    background-color: #25a0da;
+    border-color: #25a0da;
+}
+
+.svg-icon-loader {
+    width: 100px;
+    height: 100px;
+    float: left;
+    line-height: 100px;
+    text-align: center;
+}
+
+    .svg-icon-loader img {
+        vertical-align: middle;
+    }
+
+#loading {
+    z-index: 5555;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: #fff;
+}
+
+    #loading .svg-icon-loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -50px 0 0 -50px;
+    }
+
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 12px;
+    line-height: 1.428571429;
+    border-radius: 15px;
+}
+
+    .btn-circle.btn-lg {
+        width: 50px;
+        height: 50px;
+        padding: 10px 16px;
+        font-size: 18px;
+        line-height: 1.33;
+        border-radius: 25px;
+    }
+
+    .btn-circle.btn-xl {
+        width: 70px;
+        height: 70px;
+        padding: 10px 16px;
+        font-size: 30px;
+        line-height: 1.33;
+        border-radius: 35px;
+    }

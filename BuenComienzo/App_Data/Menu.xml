@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Menu>
+  <Administracion Nombre="Administración" Clase="fa fa-cogs">
+    <item Nombre="Administración de Informes" Pagina="Administracion/Reportes.aspx" />
+    <item Nombre="Seguridad" Pagina="Administracion/Seguridad.aspx" />
+    <item Nombre="Seguridad Informes" Pagina="Administracion/SeguridadReportes.aspx" />
+    <item Nombre="Talento Humano" Pagina="Administracion/Usuarios.aspx" />
+    <item Nombre="Lugares" Pagina="Administracion/Lugar.aspx" />
+    <item Nombre="Cargar Archivos" Pagina="Administracion/CargarArchivosBulk.aspx" />
+  </Administracion>
+
+  <Gestion Nombre="Gestión" Clase="fa fa-cogs">
+    <item Nombre="Ubas" Pagina="Administracion/Ubas.aspx" />
+    <item Nombre="Sedes" Pagina="Administracion/Sedes.aspx" />
+    <item Nombre="Relacion Coordinadores" Pagina="Administracion/CoordinadorSedesUbas.aspx" />
+  </Gestion>
+  
+  <Operacion Nombre="Operación" Clase="fa fa-child">
+    <item Nombre="Caracterización" Pagina="Operacion/Caracterizacion.aspx" />
+    <item Nombre="Cronograma" Pagina="Operacion/Cronograma.aspx" />
+    <item Nombre="Encuentro Educativo" Pagina="Operacion/EncuentroEducativo.aspx" />
+    <item Nombre="Encuentro Educativo en el Hogar" Pagina="Operacion/EncuentroEducativoHogar.aspx" />
+    <item Nombre="Entrega de Paquetes" Pagina="Operacion/EntregaPaquetes.aspx" />
+	<item Nombre="Orientación a Servicios" Pagina="Operacion/OrientacionServicio.aspx" />
+    <item Nombre="Seguimiento Nutricional" Pagina="Operacion/SeguimientoNutricional.aspx" />
+	<item Nombre="Seguimiento Deficit Nutricional" Pagina="Operacion/SeguimientoDeficitNutricional.aspx" />
+  </Operacion>
+
+  <RemisionInterna Nombre="Remisiones Internas" Clase="fa fa-heartbeat">
+  	<item Nombre="Creación de Remisión Interna" Pagina="Remision/CreacionRemision.aspx" />
+  	<item Nombre="Mis remisiones pendientes" Pagina="Remision/RemisionesPendientes.aspx" />
+  </RemisionInterna>
+	
+  <VisitaHogares Nombre="Visita Hogares" Clase="fa fa-home">
+    <item Nombre="Cabeza de Hogar" Pagina="Operacion/VisitaCabezaHogar.aspx" />
+    <item Nombre="Visita" Pagina="Operacion/Visita.aspx" />
+  </VisitaHogares>
+  <Informes Nombre="Informes" Clase="fa fa-chart-pie">
+    <item Nombre="Informe dinámico" Pagina="Administracion/ReportesDinamicos.aspx" />
+  </Informes>
+</Menu>

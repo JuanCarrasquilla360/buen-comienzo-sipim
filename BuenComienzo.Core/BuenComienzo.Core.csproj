@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{536FEF7D-2409-41CB-9E35-3B7C34F06C86}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BuenComienzo.Core</RootNamespace>
+    <AssemblyName>BuenComienzo.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Workspaces\NutriendoteConAmorTFS\NutriendoteConAmorWorkSpace\NutriendoteConAmor\CincoPasitos.Core\bin\Release\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Administracion\CoordinadorAgentes.cs" />
+    <Compile Include="Administracion\CoordinadorSedes.cs" />
+    <Compile Include="Administracion\CronogramaUbas.cs" />
+    <Compile Include="Administracion\EAPB.cs" />
+    <Compile Include="Administracion\Generalidades.cs" />
+    <Compile Include="Administracion\Sedes.cs" />
+    <Compile Include="Administracion\CoordinadorUbas.cs" />
+    <Compile Include="Administracion\Ubas.cs" />
+    <Compile Include="Maestros\Escuchaderos.cs" />
+    <Compile Include="Maestros\Procedimientos_SSR.cs" />
+    <Compile Include="Maestros\ResultadoCitologia_SSR.cs" />
+    <Compile Include="Maestros\To\EscuchaderosTO.cs" />
+    <Compile Include="Maestros\To\TipoParentescoTO.cs" />
+    <Compile Include="Administracion\CargarArchivoBulk.cs" />
+    <Compile Include="Administracion\Perfiles.cs" />
+    <Compile Include="Administracion\ReporteDinamico.cs" />
+    <Compile Include="Administracion\Lugares.cs" />
+    <Compile Include="Administracion\Seguridad.cs" />
+    <Compile Include="Administracion\SeguridadReportes.cs" />
+    <Compile Include="Administracion\TipoCamposReporte.cs" />
+    <Compile Include="Administracion\To\ContadoresTO.cs" />
+    <Compile Include="Administracion\To\EstadosTO.cs" />
+    <Compile Include="Administracion\To\LugaresTO.cs" />
+    <Compile Include="Administracion\To\RespuestaTO.cs" />
+    <Compile Include="Administracion\To\TipoArchivoBeneficiarioTO.cs" />
+    <Compile Include="Administracion\To\UsuarioTO.cs" />
+    <Compile Include="Administracion\Usuarios.cs" />
+    <Compile Include="Administracion\Varios.cs" />
+    <Compile Include="Maestros\ActividadesCronogramaLideres.cs" />
+    <Compile Include="Maestros\ActividadesTemporales.cs" />
+    <Compile Include="Maestros\ActividadesVisita.cs" />
+    <Compile Include="Maestros\Barrios.cs" />
+    <Compile Include="Maestros\Comunas.cs" />
+    <Compile Include="Maestros\DimensionRiesgoPregunta.cs" />
+    <Compile Include="Maestros\DXCIE10.cs" />
+    <Compile Include="Maestros\Eapb.cs" />
+    <Compile Include="Maestros\Entorno.cs" />
+    <Compile Include="Maestros\EstadoCaracterizacionFamiliar.cs" />
+    <Compile Include="Maestros\EstadoCivil.cs" />
+    <Compile Include="Maestros\Grados.cs" />
+    <Compile Include="Maestros\GrupoEtnia.cs" />
+    <Compile Include="Maestros\Grupos.cs" />
+    <Compile Include="Maestros\EntidadActivacionRuta.cs" />
+    <Compile Include="Maestros\NivelEducativo.cs" />
+    <Compile Include="Maestros\Ocupacion.cs" />
+    <Compile Include="Maestros\IngresosMensuales.cs" />
+    <Compile Include="Maestros\Municipio.cs" />
+    <Compile Include="Maestros\Discapacidad.cs" />
+    <Compile Include="Maestros\AtencionEspecial.cs" />
+    <Compile Include="Maestros\FactorProtector.cs" />
+    <Compile Include="Maestros\MotivoActivacionRuta.cs" />
+    <Compile Include="Maestros\TipoContrato.cs" />
+    <Compile Include="Maestros\Pais.cs" />
+    <Compile Include="Maestros\Tipologia.cs" />
+    <Compile Include="Maestros\TIpoParentesco.cs" />
+    <Compile Include="Maestros\TipoDocumento.cs" />
+    <Compile Include="Maestros\TipoGestionAseguramiento.cs" />
+    <Compile Include="Maestros\TipologiaFamiliar.cs" />
+    <Compile Include="Maestros\TipoSeguimiento.cs" />
+    <Compile Include="Maestros\TipoSeguridadSocial.cs" />
+    <Compile Include="Maestros\TipoTenencia.cs" />
+    <Compile Include="Maestros\TipoVivienda.cs" />
+    <Compile Include="Maestros\To\BarriosByComunaTO.cs" />
+    <Compile Include="Maestros\To\CustomPreguntasTO.cs" />
+    <Compile Include="Maestros\To\DimensionRiesgoPreguntaTO.cs" />
+    <Compile Include="Maestros\To\EapbByRegimenTO.cs" />
+    <Compile Include="Maestros\To\InfoIntervencionTO.cs" />
+    <Compile Include="Maestros\To\PreguntasTO.cs" />
+    <Compile Include="Maestros\To\TematicaByCategoriaTO.cs" />
+    <Compile Include="Maestros\TipoVisitaPriorizada.cs" />
+    <Compile Include="Operacion\CaracterizacionBuenComienzo.cs" />
+    <Compile Include="Operacion\Caracterizacion.cs" />
+    <Compile Include="Operacion\OrientacionServicio.cs" />
+    <Compile Include="Operacion\SeguimientoDeficitNutricional.cs" />
+    <Compile Include="Operacion\SeguimientoNutricional.cs" />
+    <Compile Include="Operacion\EntregaPaquetesDetalle.cs" />
+    <Compile Include="Operacion\EntregaPaquetes.cs" />
+    <Compile Include="Operacion\EncuentroEducativoDetalle.cs" />
+    <Compile Include="Operacion\EncuentroEducativo.cs" />
+    <Compile Include="Operacion\TipoArchivoPersona.cs" />
+    <Compile Include="Operacion\EncuentroEducativoHogar.cs" />
+    <Compile Include="Operacion\Cronograma.cs" />
+    <Compile Include="Operacion\Personas.cs" />
+    <Compile Include="Operacion\To\CronogramaTO.cs" />
+    <Compile Include="Operacion\To\PersonasTO.cs" />
+    <Compile Include="Operacion\To\VisitaCabezaHogarTO.cs" />
+    <Compile Include="Operacion\To\VisitaTO.cs" />
+    <Compile Include="Operacion\Visita.cs" />
+    <Compile Include="Operacion\VisitaCabezaHogar.cs" />
+    <Compile Include="Operacion\VisitaPriorizada.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Remision\RemisionInterna.cs" />
+    <Compile Include="Reportes\Reportes.cs" />
+    <Compile Include="Reportes\To\CamposReporteTo.cs" />
+    <Compile Include="Reportes\To\ReporteTo.cs" />
+    <Compile Include="Utilidades\Archivos.cs" />
+    <Compile Include="Utilidades\Logging.cs" />
+    <Compile Include="Utilidades\Pagina.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Utilidades\UsuarioConectado.cs" />
+    <Compile Include="Utilidades\Utilidades.cs" />
+    <Compile Include="Utilidades\VariablesSession.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BuenComienzo.AccesoDatos\BuenComienzo.AccesoDatos.csproj">
+      <Project>{76eaaedb-4857-467e-82c2-820151b102ab}</Project>
+      <Name>BuenComienzo.AccesoDatos</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
