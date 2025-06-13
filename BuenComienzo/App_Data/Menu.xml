@@ -38,4 +38,8 @@
   <Informes Nombre="Informes" Clase="fa fa-chart-pie">
     <item Nombre="Informe dinámico" Pagina="Administracion/ReportesDinamicos.aspx" />
   </Informes>
+  
+  <BusquedaActiva Nombre="Búsqueda Activa" Clase="fa fa-search">
+    <item Nombre="Cronograma" Pagina="BusquedaActiva/CronogramaBusquedaActiva.aspx" />
+  </BusquedaActiva>
 </Menu>

@@ -102,6 +102,26 @@ namespace BuenComienzo.Core.Administracion
             }
         }
 
+        public DataTable ConsultarCoordinadorAgentesTransversales(string idCoordinador)
+        {
+            try
+            {
+                DataTable dtDatos;
+                parametros = new List<Parametro>
+                {
+                    new Parametro { NombreParametro = "@IdCoordinador", Valor = idCoordinador, Tipo = typeof(string) }
+                };
+
+                dtDatos = objBd.ejecutarProcedimientoDS("dbop_Get_COORDINADORAGENTEST", parametros).Tables[0];
+                return dtDatos;
+            }
+            catch (System.Data.SqlClient.SqlException ex)
+            {
+                strError = ex.Message;
+                return null;
+            }
+        }
+
         public DataTable ConsultarCoordinadorAgentes(string idCoordinador, string ordenar, string where, int desde, string hasta)
         {
             try

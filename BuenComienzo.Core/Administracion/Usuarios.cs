@@ -270,6 +270,22 @@ namespace BuenComienzo.Core.Administracion
             }
         }
 
+        public DataTable ConsultarCoordinadoresTransversales()
+        {
+            try
+            {
+                DataTable dtDatos;
+                parametros = new List<Parametro>();
+                dtDatos = objBd.ejecutarProcedimientoDS("dbop_Get_COORDINADOREST", parametros).Tables[0];
+                return dtDatos;
+            }
+            catch (System.Data.SqlClient.SqlException ex)
+            {
+                strError = ex.Message;
+                return null;
+            }
+        }
+
         public DataTable ConsultarUsuariosEnfermeria()
         {
             try

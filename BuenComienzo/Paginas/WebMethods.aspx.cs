@@ -11,6 +11,7 @@ using System.Web.Services;
 using System.Text;
 using BuenComienzo.Core.Operacion;
 using BuenComienzo.Core.Operacion.To;
+using BuenComienzo.Core.BusquedaActiva;
 using BuenComienzo.Core.Remision;
 using System.Linq;
 using System.Reflection;
@@ -277,6 +278,43 @@ namespace BuenComienzo.Paginas
                                                   idDocumento = dr["IdCoordinador"].ToString(),
                                                   nombre = dr["Nombre"].ToString(),
                                               }).ToList();
+
+                    objRespuesta.mensaje = JsonConvert.SerializeObject(listaCoordinadores);
+                }
+                string resultado = JsonConvert.SerializeObject(objRespuesta);
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + ex.Message, tipoMensaje = "Error" };
+
+                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
+                return myJsonString;
+            }
+        }
+
+        [WebMethod(EnableSession = true)]
+        public static string ConsultarCoordinadoresTransversales()
+        {
+            RespuestaTO objRespuesta = new RespuestaTO();
+            string myJsonString = "";
+
+            try
+            {
+                Usuarios objUsuarios = new Usuarios();
+
+                DataTable dtDatos = objUsuarios.ConsultarCoordinadoresTransversales();
+
+                if (dtDatos.Rows.Count > 0)
+                {
+                    objRespuesta.resultado = true;
+
+                    var listaCoordinadores = (from DataRow dr in dtDatos.Rows
+                                            select new
+                                            {
+                                                IdCoordinador = dr["IdCoordinador"].ToString(),
+                                                nombre = dr["Nombre"].ToString(),
+                                            }).ToList();
 
                     objRespuesta.mensaje = JsonConvert.SerializeObject(listaCoordinadores);
                 }
@@ -2149,6 +2187,42 @@ namespace BuenComienzo.Paginas
         }
 
         [WebMethod(EnableSession = true)]
+        public static string ConsultarCoordinadorAgentesTransversales(string idCoordinador)
+        {
+            RespuestaTO objRespuesta = new RespuestaTO();
+            try
+            {
+                CoordinadorAgentes objCoordinadorAgentes = new CoordinadorAgentes();
+
+                DataTable dtDatos = objCoordinadorAgentes.ConsultarCoordinadorAgentesTransversales(idCoordinador);
+
+                if (dtDatos.Rows.Count > 0)
+                {
+                    objRespuesta.resultado = true;
+
+                    var listaGeneralidad = (from DataRow dr in dtDatos.Rows
+                                            select new
+                                            {
+                                                idAgente = dr["IdUsuario"].ToString(),
+                                                nombre = dr["Nombre"].ToString()
+                                            }).ToList();
+
+                    objRespuesta.mensaje = JsonConvert.SerializeObject(listaGeneralidad);
+                }
+                string resultado = JsonConvert.SerializeObject(objRespuesta);
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + ex.Message, tipoMensaje = "Error" };
+                objRespuesta.resultado = false;
+
+                string resultado = (new JavaScriptSerializer()).Serialize(objRespuesta);
+                return resultado;
+            }
+        }
+
+        [WebMethod(EnableSession = true)]
         public static string ConsultarCoordinadoresAgente(string esTraslado)
         {
             RespuestaTO objRespuesta = new RespuestaTO();
@@ -3337,10 +3411,339 @@ namespace BuenComienzo.Paginas
             }
         }
 
+        [WebMethod(EnableSession = true)]
+        [ScriptMethod(UseHttpGet = true)]
+        public static string ConsultarCronogramaBusquedaActiva()
+        {
+            try
+            {
+                CronogramaBusquedaActiva objCronogramaBusquedaActiva = new CronogramaBusquedaActiva();
+            string[] campos = new string[] { "IdCronograma", "FechaEncuentro", "Coordinador", "TipoActividad", "Actividad", "Comuna", "Barrio", "AgenteEducativo1", "AgenteEducativo2", "PuntoReferencia", "Observaciones", "MotivoReprogramacion", "UsuarioCreacion", "FechaCreacion" };
+            int sEcho = Utilidades.ToInt(HttpContext.Current.Request.Params["sEcho"]);
+            int iDisplayLength = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayLength"]);
+            int iDisplayStart = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayStart"]);
+            string rawSearch = HttpContext.Current.Request.Params["sSearch"];
+
+            var sb = new StringBuilder();
+            var filteredWhere = string.Empty;
+            var wrappedSearch = "'%" + rawSearch + "%'";
+
+            if (!string.IsNullOrEmpty(rawSearch) && rawSearch.Length > 0)
+            {
+                sb.Append(" WHERE ");
+                for (int i = 0; i < campos.Length; i++)
+                {
+                    sb.Append((i == 0) ? campos[i] + " LIKE " : " OR " + campos[i] + " LIKE ");
+                    sb.Append(wrappedSearch);
+                }
+
+                filteredWhere = sb.ToString();
+            }
+
+            string orderByClause = campos[(Utilidades.ToInt(HttpContext.Current.Request.Params["iSortCol_0"]))] + " " + HttpContext.Current.Request.Params["sSortDir_0"];
+
+            sb.Clear();
+
+            var numberOfRowsToReturn = "";
+            numberOfRowsToReturn = iDisplayLength == -1 ? "TotalRows" : (iDisplayStart + iDisplayLength).ToString();
+
+            // Para BusquedaActiva, mostrar todos los cronogramas sin restricción de coordinador
+            string IdCoordinador = "";
+
+            DataTable dtDatos = objCronogramaBusquedaActiva.ConsultarCronogramaBusquedaActiva(IdCoordinador, orderByClause, filteredWhere, iDisplayStart, numberOfRowsToReturn);
+
+            var totalDisplayRecords = "";
+            var totalRecords = "";
+            string outputJson = string.Empty;
+
+            var rowClass = "";
+            var count = 0;
+
+            // Validar que dtDatos no sea null
+            if (dtDatos == null)
+            {
+                // Retornar respuesta vacía en caso de error
+                sb.Append("{");
+                sb.Append(@"""sEcho"": ");
+                sb.AppendFormat(@"""{0}""", sEcho);
+                sb.Append(",");
+                sb.Append(@"""iTotalRecords"": 0");
+                sb.Append(",");
+                sb.Append(@"""iTotalDisplayRecords"": 0");
+                sb.Append(", ");
+                sb.Append(@"""aaData"": [ ");
+                sb.Append("]}");
+                return sb.ToString();
+            }
+
+            foreach (DataRow fila in dtDatos.Rows)
+            {
+                if (totalRecords.Length == 0)
+                {
+                    totalRecords = fila["TotalRows"].ToString();
+                    totalDisplayRecords = fila["TotalDisplayRows"].ToString();
+                }
+
+                sb.Append("{");
+                sb.AppendFormat(@"""DT_RowId"": ""{0}""", count++);
+                sb.Append(",");
+                sb.AppendFormat(@"""DT_RowClass"": ""{0}""", rowClass);
+                sb.Append(",");
+
+                for (int i = 0; i < campos.Length; i++)
+                {
+                    if (i != 0)
+                        sb.Append(",");
+
+                    sb.AppendFormat(@"""{0}"": ""{1}""", i.ToString(), fila[campos[i]].ToString().Replace("\"", "\\\""));
+                }
+
+                sb.Append(",");
+
+                string btnBotones = @"<div style='text-align: center;'><span class='ion-edit icono-grid' title='Editar' onclick=\""Editar('" + fila["IdCronograma"].ToString() + @"','N'); return false;\"" ></span></div>";
+
+                sb.AppendFormat(@"""{0}"": ""{1}""", campos.Length, btnBotones);
+
+                sb.Append("},");
+            }
+
+            // handles zero records
+            if (totalRecords.Length == 0)
+            {
+                sb.Append("{");
+                sb.Append(@"""sEcho"": ");
+                sb.AppendFormat(@"""{0}""", sEcho);
+                sb.Append(",");
+                sb.Append(@"""iTotalRecords"": 0");
+                sb.Append(",");
+                sb.Append(@"""iTotalDisplayRecords"": 0");
+                sb.Append(", ");
+                sb.Append(@"""aaData"": [ ");
+                sb.Append("]}");
+                outputJson = sb.ToString();
+
+                return outputJson;
+            }
+            outputJson = sb.Remove(sb.Length - 1, 1).ToString();
+            sb.Clear();
+
+            sb.Append("{");
+            sb.Append(@"""sEcho"": ");
+            sb.AppendFormat(@"""{0}""", sEcho);
+            sb.Append(",");
+            sb.Append(@"""iTotalRecords"": ");
+            sb.Append(totalRecords);
+            sb.Append(",");
+            sb.Append(@"""iTotalDisplayRecords"": ");
+            sb.Append(totalDisplayRecords);
+            sb.Append(", ");
+            sb.Append(@"""aaData"": [ ");
+            sb.Append(outputJson);
+            sb.Append("]}");
+            outputJson = sb.ToString();
+
+            return outputJson;
+            }
+            catch (Exception ex)
+            {
+                // En caso de error, retornar respuesta vacía
+                var sb = new StringBuilder();
+                int sEcho = Utilidades.ToInt(HttpContext.Current.Request.Params["sEcho"]);
+                
+                sb.Append("{");
+                sb.Append(@"""sEcho"": ");
+                sb.AppendFormat(@"""{0}""", sEcho);
+                sb.Append(",");
+                sb.Append(@"""iTotalRecords"": 0");
+                sb.Append(",");
+                sb.Append(@"""iTotalDisplayRecords"": 0");
+                sb.Append(", ");
+                sb.Append(@"""aaData"": [ ");
+                sb.Append("]}");
+                return sb.ToString();
+            }
+        }
+
+        [WebMethod]
+        public static string ObtenerCronogramaBusquedaActiva(string idCronograma)
+        {
+            RespuestaTO objRespuesta = new RespuestaTO();
+            try
+            {
+                CronogramaBusquedaActiva objCronogramaBusquedaActiva = new CronogramaBusquedaActiva();
+
+                DataTable dtDatos = objCronogramaBusquedaActiva.ObtenerCronogramaBusquedaActivaPorId(idCronograma);
+
+                if (dtDatos != null && dtDatos.Rows.Count > 0)
+                {
+                    objRespuesta.resultado = true;
+
+                    var listaCronograma = (from DataRow dr in dtDatos.Rows
+                                           select new
+                                           {
+                                               idCronograma = dr["IdCronograma"].ToString(),
+                                               idTipoActividad = dr["IdTipoActividad"].ToString(),
+                                               idActividad = dr["IdActividad"].ToString(),
+                                               idCoordinador = dr["IdCoordinador"].ToString(),
+                                               idBarrio = dr["IdBarrio"].ToString(),
+                                               idComuna = dr["IdComuna"].ToString(),
+                                               fechaEncuentro = dr["FechaEncuentroFormatted"].ToString(),
+                                               idAgenteEducativo1 = dr["IdAgenteEducativo1"].ToString(),
+                                               idAgenteEducativo2 = dr["IdAgenteEducativo2"].ToString(),
+                                               puntoReferencia = dr["PuntoReferencia"].ToString(),
+                                               observaciones = dr["Observaciones"].ToString(),
+                                               idMotivoReprogramacion = dr["IdMotivoReprogramacion"].ToString(),
+                                               observacionesReprogramacion = dr["ObservacionesReprogramacion"].ToString(),
+                                           }).ToList();
+
+                    objRespuesta.mensaje = JsonConvert.SerializeObject(listaCronograma);
+                }
+                else
+                {
+                    objRespuesta.resultado = false;
+                    if (dtDatos == null)
+                    {
+                        objRespuesta.mensaje = "Error al consultar el cronograma de búsqueda activa: " + objCronogramaBusquedaActiva.Error;
+                    }
+                    else
+                    {
+                        objRespuesta.mensaje = "No se encontró el cronograma de búsqueda activa con ID: " + idCronograma;
+                    }
+                    objRespuesta.tipoMensaje = "Error";
+                }
+                
+                string resultado = JsonConvert.SerializeObject(objRespuesta);
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + ex.Message, tipoMensaje = "Error" };
+                objRespuesta.resultado = false;
+
+                string resultado = (new JavaScriptSerializer()).Serialize(objRespuesta);
+                return resultado;
+            }
+        }
+
+        [WebMethod(EnableSession = true)]
+        public static string ActualizarCronogramaBusquedaActiva(string nuevo, string IdCronograma, string idCoordinador, 
+                                                               string fecha, string idAgenteEducativo1, string idAgenteEducativo2,
+                                                               string puntoReferencia, string observaciones, string motivoReprogramacion, 
+                                                               string observacionesReprogramacion, string idActividad, string idTipoActividad, 
+                                                               string idComuna, string idBarrio)
+        {
+            CronogramaBusquedaActiva objCronogramaBusquedaActiva = new CronogramaBusquedaActiva();
+            RespuestaTO objRespuesta;
+            string myJsonString;
+            string idUsuarioCreacion = ((UsuarioTO)HttpContext.Current.Session[VariablesSession.DatosUsuario]).IdDocumento;
+
+            // Solo parsear y validar fecha en modo nuevo
+            DateTime fechaEncuentro = DateTime.Now; // Valor por defecto
+            
+            if (nuevo == "S")
+            {
+                // Parsear la fecha solo en modo nuevo
+                fechaEncuentro = DateTime.ParseExact(fecha, "dd/MM/yyyy HH:mm", null);
+
+                // Validar que la fecha esté dentro del rango permitido
+                DateTime hoy = DateTime.Today;
+                DateTime finDelMes = new DateTime(hoy.Year, hoy.Month, DateTime.DaysInMonth(hoy.Year, hoy.Month), 23, 59, 59);
+
+                if (fechaEncuentro.Date < hoy)
+                {
+                    objRespuesta = new RespuestaTO() 
+                    { 
+                        resultado = false, 
+                        mensaje = "La fecha del encuentro no puede ser anterior a hoy", 
+                        tipoMensaje = "Error" 
+                    };
+                    return JsonConvert.SerializeObject(objRespuesta);
+                }
+
+                if (fechaEncuentro > finDelMes)
+                {
+                    objRespuesta = new RespuestaTO() 
+                    { 
+                        resultado = false, 
+                        mensaje = "La fecha del encuentro no puede ser posterior al final del mes actual", 
+                        tipoMensaje = "Error" 
+                    };
+                    return JsonConvert.SerializeObject(objRespuesta);
+                }
+            }
+
+            try
+            {
+                if (nuevo == "S")
+                {
+                    // Convertir idComuna a byte? si no está vacío
+                    byte? idComunaByte = null;
+                    if (!string.IsNullOrEmpty(idComuna))
+                    {
+                        if (byte.TryParse(idComuna, out byte comunaValue))
+                            idComunaByte = comunaValue;
+                    }
+
+                    // Verificar si ya existe un cronograma con las mismas características
+                    if (!objCronogramaBusquedaActiva.ExisteCronogramaBusquedaActiva(idCoordinador, idTipoActividad, idActividad, idBarrio, idComunaByte))
+                    {
+                        string idCronogramaGenerado = objCronogramaBusquedaActiva.InsertarCronogramaBusquedaActiva(idTipoActividad, idActividad, idCoordinador,
+                                                                                                                  idBarrio, idComunaByte, fechaEncuentro,
+                                                                                                                  idAgenteEducativo1, idAgenteEducativo2, 
+                                                                                                                  puntoReferencia, observaciones, idUsuarioCreacion);
+
+                        if (!string.IsNullOrEmpty(idCronogramaGenerado))
+                        {
+                            objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se insertó el cronograma de búsqueda activa [" + idCronogramaGenerado + "] satisfactoriamente", tipoMensaje = "Exito" };
+                        }
+                        else
+                        {
+                            objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + objCronogramaBusquedaActiva.Error, tipoMensaje = "Error" };
+                        }
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(objCronogramaBusquedaActiva.Error))
+                            objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ya existe un cronograma de búsqueda activa en nuestro sistema con las mismas características de coordinador, tipo de actividad, actividad y ubicación del que intentas ingresar.", tipoMensaje = "Error" };
+                        else
+                            objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + objCronogramaBusquedaActiva.Error, tipoMensaje = "Error" };
+                    }
+                }
+                else
+                {
+                    // Modo edición - solo permitir reprogramación
+                    if (!string.IsNullOrEmpty(motivoReprogramacion))
+                    {
+                        if (objCronogramaBusquedaActiva.ActualizarReprogramacionCronogramaBusquedaActiva(IdCronograma, motivoReprogramacion, observacionesReprogramacion, idUsuarioCreacion))
+                        {
+                            objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se reprogramó el cronograma de búsqueda activa [" + IdCronograma + "] satisfactoriamente", tipoMensaje = "Exito" };
+                        }
+                        else
+                        {
+                            objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + objCronogramaBusquedaActiva.Error, tipoMensaje = "Error" };
+                        }
+                    }
+                    else
+                    {
+                        objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Debe seleccionar un motivo de reprogramación para editar el cronograma", tipoMensaje = "Error" };
+                    }
+                }
+
+                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
+                return myJsonString;
+            }
+            catch (Exception ex)
+            {
+                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + ex.Message, tipoMensaje = "Error" };
+
+                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
+                return myJsonString;
+            }
+        }
 
         #endregion
 
-        #region Entrega Paquete
+        #region Entrega Paquetes
 
         [WebMethod(EnableSession = true)]
         [ScriptMethod(UseHttpGet = true)]
@@ -4299,557 +4702,6 @@ namespace BuenComienzo.Paginas
 
                 string resultado = (new JavaScriptSerializer()).Serialize(objRespuesta);
                 return resultado;
-            }
-        }
-
-        #endregion
-
-        #region Seguimiento Nutricional
-
-        [WebMethod(EnableSession = true)]
-        [ScriptMethod(UseHttpGet = true)]
-        public static string ConsultarSeguimientoNutricional()
-        {
-            SeguimientoNutricional objSeguimientoNutricional = new SeguimientoNutricional();
-            string[] campos = new string[] { "IdSeguimientoNutricional", "NumeroIdentificacion", "NombreParticipante", "FechaHora", "TipoAtencion", "Peso", "Talla", "PerimetroBraquial", "Coordinador", "UsuarioCreacion", "FechaCreacion" };
-            int sEcho = Utilidades.ToInt(HttpContext.Current.Request.Params["sEcho"]);
-            int iDisplayLength = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayLength"]);
-            int iDisplayStart = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayStart"]);
-            string rawSearch = HttpContext.Current.Request.Params["sSearch"];
-
-            var sb = new StringBuilder();
-            var filteredWhere = string.Empty;
-            var wrappedSearch = "'%" + rawSearch + "%'";
-
-            if (!string.IsNullOrEmpty(rawSearch) && rawSearch.Length > 0)
-            {
-                sb.Append(" WHERE ");
-                for (int i = 0; i < campos.Length; i++)
-                {
-                    sb.Append((i == 0) ? campos[i] + " LIKE " : " OR " + campos[i] + " LIKE ");
-                    sb.Append(wrappedSearch);
-                }
-
-                filteredWhere = sb.ToString();
-            }
-
-            string orderByClause = campos[(Utilidades.ToInt(HttpContext.Current.Request.Params["iSortCol_0"]))] + " " + HttpContext.Current.Request.Params["sSortDir_0"];
-
-            sb.Clear();
-
-            var numberOfRowsToReturn = "";
-            numberOfRowsToReturn = iDisplayLength == -1 ? "TotalRows" : (iDisplayStart + iDisplayLength).ToString();
-
-            UsuarioTO objUsuario = (UsuarioTO)HttpContext.Current.Session[VariablesSession.DatosUsuario];
-            string IdCoodinador = "";
-
-            if (((UsuarioTO)HttpContext.Current.Session[VariablesSession.DatosUsuario]).IdPerfil.Value != 1)
-            {
-                CoordinadorAgentes objCoordinadorAgentes = new CoordinadorAgentes();
-                DataTable dtCoordinadores = objCoordinadorAgentes.ObtenerCoordiandoresAgente(objUsuario.IdDocumento);
-
-                foreach (DataRow fila in dtCoordinadores.Rows)
-                    IdCoodinador += fila["IdCoordinador"] + ",";
-
-                IdCoodinador = IdCoodinador.Substring(0, IdCoodinador.Length - 1);
-            }
-
-            DataTable dtDatos = objSeguimientoNutricional.ConsultarSeguimientoNutricional(IdCoodinador, orderByClause, filteredWhere, iDisplayStart, numberOfRowsToReturn);
-
-            var totalDisplayRecords = "";
-            var totalRecords = "";
-            string outputJson = string.Empty;
-
-            var rowClass = "";
-            var count = 0;
-
-            foreach (DataRow fila in dtDatos.Rows)
-            {
-                if (totalRecords.Length == 0)
-                {
-                    totalRecords = fila["TotalRows"].ToString();
-                    totalDisplayRecords = fila["TotalDisplayRows"].ToString();
-                }
-
-                sb.Append("{");
-                sb.AppendFormat(@"""DT_RowId"": ""{0}""", count++);
-                sb.Append(",");
-                sb.AppendFormat(@"""DT_RowClass"": ""{0}""", rowClass);
-                sb.Append(",");
-
-                for (int i = 0; i < campos.Length; i++)
-                {
-                    if (i != 0)
-                        sb.Append(",");
-
-                    sb.AppendFormat(@"""{0}"": ""{1}""", i.ToString(), fila[campos[i]].ToString().Replace("\"", "\\\""));
-                }
-
-                sb.Append(",");
-
-                string btnBotones = @"<div style='text-align: center;'><span class='ion-edit icono-grid' title='Editar' onclick=\""Editar('" + fila[3].ToString() + @"','N'); return false;\"" ></span>&nbsp;&nbsp;<span class='ion-android-delete icono-grid' title='Eliminar' onclick=\""Eliminar('" + fila[3].ToString() + "','" + fila[6].ToString() + @"'); return false;\"" ></span></div>";
-
-                sb.AppendFormat(@"""{0}"": ""{1}""", campos.Length, btnBotones);
-
-                sb.Append("},");
-            }
-
-            // handles zero records
-            if (totalRecords.Length == 0)
-            {
-                sb.Append("{");
-                sb.Append(@"""sEcho"": ");
-                sb.AppendFormat(@"""{0}""", sEcho);
-                sb.Append(",");
-                sb.Append(@"""iTotalRecords"": 0");
-                sb.Append(",");
-                sb.Append(@"""iTotalDisplayRecords"": 0");
-                sb.Append(", ");
-                sb.Append(@"""aaData"": [ ");
-                sb.Append("]}");
-                outputJson = sb.ToString();
-
-                return outputJson;
-            }
-            outputJson = sb.Remove(sb.Length - 1, 1).ToString();
-            sb.Clear();
-
-            sb.Append("{");
-            sb.Append(@"""sEcho"": ");
-            sb.AppendFormat(@"""{0}""", sEcho);
-            sb.Append(",");
-            sb.Append(@"""iTotalRecords"": ");
-            sb.Append(totalRecords);
-            sb.Append(",");
-            sb.Append(@"""iTotalDisplayRecords"": ");
-            sb.Append(totalDisplayRecords);
-            sb.Append(", ");
-            sb.Append(@"""aaData"": [ ");
-            sb.Append(outputJson);
-            sb.Append("]}");
-            outputJson = sb.ToString();
-
-            return outputJson;
-        }
-
-        [WebMethod(EnableSession = true)]
-        public static string ActualizarSeguimientoNutricional(string nuevo, string idSeguimientoNutricional, string numeroIdentificacion, string fechaHora,
-                                                    string idTipoAtencion, string idCicloVital, string peso, string talla, string perimetroBraquial,
-                                                    string desviacionEstandar, string IMC, string dXNutricional, string dXEnfermedadBase, string enfermedades,
-                                                    string signosFisicosCarenciales, string idInseguridadAlimentaria, string idAccesoServiciosPublicos,
-                                                    string idAccesoServiciosSalud, string condicionesVivienda, string aspectosPsicosocialesVulneracionDerechos,
-                                                    string idLactanciaMaterna, string accionesRealizadas, string idMatricula, string idCoordinador)
-        {
-            SeguimientoNutricional objSeguimientoNutricional = new SeguimientoNutricional();
-            RespuestaTO objRespuesta;
-            string myJsonString;
-            string idUsuarioCreacion = ((UsuarioTO)HttpContext.Current.Session[VariablesSession.DatosUsuario]).IdDocumento;
-            DateTime pFecha = DateTime.ParseExact(fechaHora, "dd/MM/yyyy HH:mm", null);
-
-            try
-            {
-                if (nuevo == "S")
-                {
-                    string id = objSeguimientoNutricional.InsertarSeguimientoNutricional(numeroIdentificacion, pFecha,
-                                    idTipoAtencion, idCicloVital, peso, talla, perimetroBraquial,
-                                    desviacionEstandar, IMC, dXNutricional, dXEnfermedadBase, enfermedades,
-                                    signosFisicosCarenciales, idInseguridadAlimentaria, idAccesoServiciosPublicos,
-                                    idAccesoServiciosSalud, condicionesVivienda, aspectosPsicosocialesVulneracionDerechos,
-                                    idLactanciaMaterna, accionesRealizadas, idMatricula, idCoordinador, idUsuarioCreacion);
-                    if (!string.IsNullOrEmpty(id))
-                        objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se insertó el Seguimiento Nutricional [" + id + "] satisfactoriamente", tipoMensaje = "Exito" };
-                    else
-                        objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + objSeguimientoNutricional.Error, tipoMensaje = "Error" };
-                }
-                else
-                {
-                    bool resp = objSeguimientoNutricional.ActualizarSeguimientoNutricional(idSeguimientoNutricional, numeroIdentificacion, pFecha,
-                                    idTipoAtencion, idCicloVital, peso, talla, perimetroBraquial,
-                                    desviacionEstandar, IMC, dXNutricional, dXEnfermedadBase, enfermedades,
-                                    signosFisicosCarenciales, idInseguridadAlimentaria, idAccesoServiciosPublicos,
-                                    idAccesoServiciosSalud, condicionesVivienda, aspectosPsicosocialesVulneracionDerechos,
-                                    idLactanciaMaterna, accionesRealizadas, idUsuarioCreacion);
-                    if (resp)
-                        objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se actualizó el Seguimiento Nutricional [" + idSeguimientoNutricional + "] satisfactoriamente", tipoMensaje = "Exito" };
-                    else
-                        objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + objSeguimientoNutricional.Error, tipoMensaje = "Error" };
-                }
-
-                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return myJsonString;
-            }
-            catch (Exception ex)
-            {
-                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + ex.Message, tipoMensaje = "Error" };
-
-                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return myJsonString;
-            }
-        }
-
-        [WebMethod]
-        public static string ObtenerSeguimientoNutricional(string idSeguimientoNutricional)
-        {
-            RespuestaTO objRespuesta = new RespuestaTO();
-            try
-            {
-                SeguimientoNutricional objSeguimientoNutricional = new SeguimientoNutricional();
-
-                DataTable dtDatos = objSeguimientoNutricional.ObtenerSeguimientoNutricional(idSeguimientoNutricional);
-
-                if (dtDatos.Rows.Count > 0)
-                {
-                    objRespuesta.resultado = true;
-
-                    var listaSeguimientoNutricional = (from DataRow dr in dtDatos.Rows
-                                                        select new
-                                                        {
-                                                            idSeguimientoNutricional = dr["IdSeguimientoNutricional"].ToString(),
-                                                            numeroIdentificacion = dr["NumeroIdentificacion"].ToString(),
-                                                            fechaHora = DateTime.Parse(dr["FechaHora"].ToString()).ToString("dd/MM/yyyy HH:mm"),
-                                                            idTipoAtencion = dr["IdTipoAtencion"].ToString(),
-                                                            idCicloVital = dr["IdCicloVital"].ToString(),
-                                                            peso = dr["Peso"].ToString(),
-                                                            talla = dr["Talla"].ToString(),
-                                                            perimetroBraquial = dr["PerimetroBraquial"].ToString(),
-                                                            desviacionEstandar = dr["DesviacionEstandar"].ToString(),
-                                                            IMC = dr["IMC"].ToString(),
-                                                            dXNutricional = dr["DXNutricional"].ToString(),
-                                                            dXEnfermedadBase = dr["DXEnfermedadBase"].ToString(),
-                                                            enfermedades = dr["Enfermedades"].ToString(),
-                                                            signosFisicosCarenciales = dr["SignosFisicosCarenciales"].ToString(),
-                                                            idInseguridadAlimentaria = dr["IdInseguridadAlimentaria"].ToString(),
-                                                            idAccesoServiciosPublicos = dr["IdAccesoServiciosPublicos"].ToString(),
-                                                            idAccesoServiciosSalud = dr["IdAccesoServiciosSalud"].ToString(),
-                                                            condicionesVivienda = dr["CondicionesVivienda"].ToString(),
-                                                            aspectosPsicosocialesVulneracionDerechos = dr["AspectosPsicosocialesVulneracionDerechos"].ToString(),
-                                                            idLactanciaMaterna = dr["IdLactanciaMaterna"].ToString(),
-                                                            accionesRealizadas = dr["AccionesRealizadas"].ToString(),
-                                                            idMatricula = dr["IdMatricula"].ToString(),
-                                                            idCoordinador = dr["IdCoordinador"].ToString(),
-                                                            idUsuarioCreacion = dr["IdUsuarioCreacion"].ToString(),
-                                                            fechaCreacion = dr["FechaCreacion"].ToString(),
-                                                            idUsuarioModificacion = dr["IdUsuarioModificacion"].ToString(),
-                                                            fechaModificacion = dr["FechaModificacion"].ToString()
-                                                        }).ToList();
-
-                    objRespuesta.mensaje = JsonConvert.SerializeObject(listaSeguimientoNutricional);
-                }
-                string resultado = JsonConvert.SerializeObject(objRespuesta);
-                return resultado;
-            }
-            catch (Exception ex)
-            {
-                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + ex.Message, tipoMensaje = "Error" };
-                objRespuesta.resultado = false;
-
-                string resultado = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return resultado;
-            }
-        }
-
-        [WebMethod(EnableSession = true)]
-        public static string EliminarSeguimientoNutricional(string idSeguimientoNutricional)
-        {
-            SeguimientoNutricional objSeguimientoNutricional = new SeguimientoNutricional();
-            RespuestaTO objRespuesta;
-            string myJsonString;
-
-            try
-            {
-                bool resp = objSeguimientoNutricional.EliminarSeguimientoNutricional(idSeguimientoNutricional);
-                if (resp)
-                    objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se eliminó el Seguimiento Nutricional con código " + idSeguimientoNutricional + " satisfactoriamente", tipoMensaje = "Exito" };
-                else
-                    objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + resp, tipoMensaje = "Error" };
-
-                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return myJsonString;
-            }
-            catch (Exception ex)
-            {
-                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + ex.Message, tipoMensaje = "Error" };
-
-                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return myJsonString;
-            }
-        }
-
-        #endregion
-
-        #region Seguimiento Deficit Nutricional
-
-        [WebMethod(EnableSession = true)]
-        [ScriptMethod(UseHttpGet = true)]
-        public static string ConsultarSeguimientoDeficitNutricional()
-        {
-            SeguimientoDeficitNutricional objSeguimientoDeficitNutricional = new SeguimientoDeficitNutricional();
-            string[] campos = new string[] { "IdSeguimientoDeficitNutricional", "NumeroIdentificacion", "NombreParticipante", "FechaHora", "MedioRealizacionSeguimiento", "Peso", "Talla", "DXNutricional", "Coordinador", "UsuarioCreacion", "FechaCreacion" };
-            int sEcho = Utilidades.ToInt(HttpContext.Current.Request.Params["sEcho"]);
-            int iDisplayLength = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayLength"]);
-            int iDisplayStart = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayStart"]);
-            string rawSearch = HttpContext.Current.Request.Params["sSearch"];
-
-            var sb = new StringBuilder();
-            var filteredWhere = string.Empty;
-            var wrappedSearch = "'%" + rawSearch + "%'";
-
-            if (!string.IsNullOrEmpty(rawSearch) && rawSearch.Length > 0)
-            {
-                sb.Append(" WHERE ");
-                for (int i = 0; i < campos.Length; i++)
-                {
-                    sb.Append((i == 0) ? campos[i] + " LIKE " : " OR " + campos[i] + " LIKE ");
-                    sb.Append(wrappedSearch);
-                }
-
-                filteredWhere = sb.ToString();
-            }
-
-            string orderByClause = campos[(Utilidades.ToInt(HttpContext.Current.Request.Params["iSortCol_0"]))] + " " + HttpContext.Current.Request.Params["sSortDir_0"];
-
-            sb.Clear();
-
-            var numberOfRowsToReturn = "";
-            numberOfRowsToReturn = iDisplayLength == -1 ? "TotalRows" : (iDisplayStart + iDisplayLength).ToString();
-
-            UsuarioTO objUsuario = (UsuarioTO)HttpContext.Current.Session[VariablesSession.DatosUsuario];
-            string IdCoodinador = "";
-
-            if (((UsuarioTO)HttpContext.Current.Session[VariablesSession.DatosUsuario]).IdPerfil.Value != 1)
-            {
-                CoordinadorAgentes objCoordinadorAgentes = new CoordinadorAgentes();
-                DataTable dtCoordinadores = objCoordinadorAgentes.ObtenerCoordiandoresAgente(objUsuario.IdDocumento);
-
-                foreach (DataRow fila in dtCoordinadores.Rows)
-                    IdCoodinador += fila["IdCoordinador"] + ",";
-
-                IdCoodinador = IdCoodinador.Substring(0, IdCoodinador.Length - 1);
-            }
-
-            DataTable dtDatos = objSeguimientoDeficitNutricional.ConsultarSeguimientoDeficitNutricional(IdCoodinador, orderByClause, filteredWhere, iDisplayStart, numberOfRowsToReturn);
-
-            var totalDisplayRecords = "";
-            var totalRecords = "";
-            string outputJson = string.Empty;
-
-            var rowClass = "";
-            var count = 0;
-
-            foreach (DataRow fila in dtDatos.Rows)
-            {
-                if (totalRecords.Length == 0)
-                {
-                    totalRecords = fila["TotalRows"].ToString();
-                    totalDisplayRecords = fila["TotalDisplayRows"].ToString();
-                }
-
-                sb.Append("{");
-                sb.AppendFormat(@"""DT_RowId"": ""{0}""", count++);
-                sb.Append(",");
-                sb.AppendFormat(@"""DT_RowClass"": ""{0}""", rowClass);
-                sb.Append(",");
-
-                for (int i = 0; i < campos.Length; i++)
-                {
-                    if (i != 0)
-                        sb.Append(",");
-
-                    sb.AppendFormat(@"""{0}"": ""{1}""", i.ToString(), fila[campos[i]].ToString().Replace("\"", "\\\""));
-                }
-
-                sb.Append(",");
-
-                string btnBotones = @"<div style='text-align: center;'><span class='ion-android-delete icono-grid' title='Eliminar' onclick=\""Eliminar('" + fila[3].ToString() + "','" + fila[6].ToString() + @"'); return false;\"" ></span></div>";
-
-                sb.AppendFormat(@"""{0}"": ""{1}""", campos.Length, btnBotones);
-
-                sb.Append("},");
-            }
-
-            // handles zero records
-            if (totalRecords.Length == 0)
-            {
-                sb.Append("{");
-                sb.Append(@"""sEcho"": ");
-                sb.AppendFormat(@"""{0}""", sEcho);
-                sb.Append(",");
-                sb.Append(@"""iTotalRecords"": 0");
-                sb.Append(",");
-                sb.Append(@"""iTotalDisplayRecords"": 0");
-                sb.Append(", ");
-                sb.Append(@"""aaData"": [ ");
-                sb.Append("]}");
-                outputJson = sb.ToString();
-
-                return outputJson;
-            }
-            outputJson = sb.Remove(sb.Length - 1, 1).ToString();
-            sb.Clear();
-
-            sb.Append("{");
-            sb.Append(@"""sEcho"": ");
-            sb.AppendFormat(@"""{0}""", sEcho);
-            sb.Append(",");
-            sb.Append(@"""iTotalRecords"": ");
-            sb.Append(totalRecords);
-            sb.Append(",");
-            sb.Append(@"""iTotalDisplayRecords"": ");
-            sb.Append(totalDisplayRecords);
-            sb.Append(", ");
-            sb.Append(@"""aaData"": [ ");
-            sb.Append(outputJson);
-            sb.Append("]}");
-            outputJson = sb.ToString();
-
-            return outputJson;
-        }
-
-        [WebMethod(EnableSession = true)]
-        public static string ActualizarSeguimientoDeficitNutricional(string nuevo, string idSeguimientoDeficitNutricional, string numeroIdentificacion, string fechaHora,
-                                                    string idTipoAtencion, string idCicloVital, string peso, string talla, string perimetroBraquial, string perimetroCefalico,
-                                                    string semanasGestacion, string dXNutricional, string tallaEdad, string cuantosSeguimientosRealizado, string remisionFisica,
-                                                    string remisionEfectivaAtencionSalud, string describaAtencionesRecibidas, string notificaNutrirParaSanar, string accionesImplementadas,
-                                                    string huboHospitalizacion, string recibeComplementacionEntidadSalud, string queComplementacionRecibe, string cualOtraComplementacion,
-                                                    string diligenciamientoSivigila, string recibeRacionAlimentaria365, string recibeRacionNutrirParaSanar, string queTipoRacionNutrirParaSanarRecibe,
-                                                    string clasificacionELCSA, string cambioSuEstadoNutricional, string nuevoDiagnostico, string aspectosAlimentarios, string aspectosBioquimicos,
-                                                    string aspectosClinicos, string aspectosEconomicos, string aspectosFamiliares, string aspectosPsicosociales, string devolucionFamiliaAspectosAbordadosNutricional,
-                                                    string socializacionSeguimientoEquipo, string activacionRutaVulneracionDerechos, string especificarCualVulneracion, string describaAccionesRealizadas,
-                                                    string observacionesGenerales, string compromisoEstablecidoConFamilia, string nombreArchivoGuid, string fileName, string casoCerrado,
-                                                    string idMatricula, string idCoordinador)
-        {
-            SeguimientoDeficitNutricional objSeguimientoDeficitNutricional = new SeguimientoDeficitNutricional();
-            RespuestaTO objRespuesta;
-            string myJsonString;
-            string idUsuarioCreacion = ((UsuarioTO)HttpContext.Current.Session[VariablesSession.DatosUsuario]).IdDocumento;
-            DateTime pFecha = DateTime.ParseExact(fechaHora, "dd/MM/yyyy HH:mm", null);
-
-            try
-            {
-                if (nuevo == "S")
-                {
-                    string id = objSeguimientoDeficitNutricional.InsertarSeguimientoDeficitNutricional(numeroIdentificacion, pFecha, idTipoAtencion, idCicloVital, peso, talla, 
-                                    perimetroBraquial, perimetroCefalico, semanasGestacion, dXNutricional, tallaEdad, cuantosSeguimientosRealizado, remisionFisica,
-                                    remisionEfectivaAtencionSalud, describaAtencionesRecibidas, notificaNutrirParaSanar, accionesImplementadas, huboHospitalizacion, 
-                                    recibeComplementacionEntidadSalud, queComplementacionRecibe, cualOtraComplementacion, diligenciamientoSivigila, recibeRacionAlimentaria365, 
-                                    recibeRacionNutrirParaSanar, queTipoRacionNutrirParaSanarRecibe, clasificacionELCSA, cambioSuEstadoNutricional, nuevoDiagnostico, 
-                                    aspectosAlimentarios, aspectosBioquimicos, aspectosClinicos, aspectosEconomicos, aspectosFamiliares, aspectosPsicosociales, 
-                                    devolucionFamiliaAspectosAbordadosNutricional, socializacionSeguimientoEquipo, activacionRutaVulneracionDerechos, especificarCualVulneracion, 
-                                    describaAccionesRealizadas, observacionesGenerales, compromisoEstablecidoConFamilia, nombreArchivoGuid, fileName, casoCerrado,
-                                    idMatricula, idCoordinador, idUsuarioCreacion);
-
-                    if (!string.IsNullOrEmpty(id))
-                        objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se insertó el Seguimiento Nutricional [" + id + "] satisfactoriamente", tipoMensaje = "Exito" };
-                    else
-                        objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + objSeguimientoDeficitNutricional.Error, tipoMensaje = "Error" };
-                }
-                else
-                {
-                    bool resp = objSeguimientoDeficitNutricional.ActualizarSeguimientoDeficitNutricional(idSeguimientoDeficitNutricional, numeroIdentificacion, pFecha,
-                                    idTipoAtencion, idCicloVital, peso, talla, perimetroBraquial, dXNutricional, idUsuarioCreacion);
-                    if (resp)
-                        objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se actualizó el Seguimiento Nutricional [" + idSeguimientoDeficitNutricional + "] satisfactoriamente", tipoMensaje = "Exito" };
-                    else
-                        objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + objSeguimientoDeficitNutricional.Error, tipoMensaje = "Error" };
-                }
-
-                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return myJsonString;
-            }
-            catch (Exception ex)
-            {
-                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + ex.Message, tipoMensaje = "Error" };
-
-                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return myJsonString;
-            }
-        }
-
-        [WebMethod]
-        public static string ObtenerSeguimientoDeficitNutricional(string idSeguimientoDeficitNutricional)
-        {
-            RespuestaTO objRespuesta = new RespuestaTO();
-            try
-            {
-                SeguimientoDeficitNutricional objSeguimientoDeficitNutricional = new SeguimientoDeficitNutricional();
-
-                DataTable dtDatos = objSeguimientoDeficitNutricional.ObtenerSeguimientoDeficitNutricional(idSeguimientoDeficitNutricional);
-
-                if (dtDatos.Rows.Count > 0)
-                {
-                    objRespuesta.resultado = true;
-
-                    var listaSeguimientoDeficitNutricional = (from DataRow dr in dtDatos.Rows
-                                                       select new
-                                                       {
-                                                           idSeguimientoDeficitNutricional = dr["IdSeguimientoDeficitNutricional"].ToString(),
-                                                           numeroIdentificacion = dr["NumeroIdentificacion"].ToString(),
-                                                           fechaHora = DateTime.Parse(dr["FechaHora"].ToString()).ToString("dd/MM/yyyy HH:mm"),
-                                                           idTipoAtencion = dr["IdTipoAtencion"].ToString(),
-                                                           idCicloVital = dr["IdCicloVital"].ToString(),
-                                                           peso = dr["Peso"].ToString(),
-                                                           talla = dr["Talla"].ToString(),
-                                                           perimetroBraquial = dr["PerimetroBraquial"].ToString(),
-                                                           desviacionEstandar = dr["DesviacionEstandar"].ToString(),
-                                                           IMC = dr["IMC"].ToString(),
-                                                           dXNutricional = dr["DXNutricional"].ToString(),
-                                                           dXEnfermedadBase = dr["DXEnfermedadBase"].ToString(),
-                                                           enfermedades = dr["Enfermedades"].ToString(),
-                                                           signosFisicosCarenciales = dr["SignosFisicosCarenciales"].ToString(),
-                                                           idInseguridadAlimentaria = dr["IdInseguridadAlimentaria"].ToString(),
-                                                           idAccesoServiciosPublicos = dr["IdAccesoServiciosPublicos"].ToString(),
-                                                           idAccesoServiciosSalud = dr["IdAccesoServiciosSalud"].ToString(),
-                                                           condicionesVivienda = dr["CondicionesVivienda"].ToString(),
-                                                           aspectosPsicosocialesVulneracionDerechos = dr["AspectosPsicosocialesVulneracionDerechos"].ToString(),
-                                                           idLactanciaMaterna = dr["IdLactanciaMaterna"].ToString(),
-                                                           accionesRealizadas = dr["AccionesRealizadas"].ToString(),
-                                                           idMatricula = dr["IdMatricula"].ToString(),
-                                                           idCoordinador = dr["IdCoordinador"].ToString(),
-                                                           idUsuarioCreacion = dr["IdUsuarioCreacion"].ToString(),
-                                                           fechaCreacion = dr["FechaCreacion"].ToString(),
-                                                           idUsuarioModificacion = dr["IdUsuarioModificacion"].ToString(),
-                                                           fechaModificacion = dr["FechaModificacion"].ToString()
-                                                       }).ToList();
-
-                    objRespuesta.mensaje = JsonConvert.SerializeObject(listaSeguimientoDeficitNutricional);
-                }
-                string resultado = JsonConvert.SerializeObject(objRespuesta);
-                return resultado;
-            }
-            catch (Exception ex)
-            {
-                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + ex.Message, tipoMensaje = "Error" };
-                objRespuesta.resultado = false;
-
-                string resultado = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return resultado;
-            }
-        }
-
-        [WebMethod(EnableSession = true)]
-        public static string EliminarSeguimientoDeficitNutricional(string idSeguimientoDeficitNutricional)
-        {
-            SeguimientoDeficitNutricional objSeguimientoDeficitNutricional = new SeguimientoDeficitNutricional();
-            RespuestaTO objRespuesta;
-            string myJsonString;
-
-            try
-            {
-                bool resp = objSeguimientoDeficitNutricional.EliminarSeguimientoDeficitNutricional(idSeguimientoDeficitNutricional);
-                if (resp)
-                    objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se eliminó el Seguimiento Nutricional con código " + idSeguimientoDeficitNutricional + " satisfactoriamente", tipoMensaje = "Exito" };
-                else
-                    objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + resp, tipoMensaje = "Error" };
-
-                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return myJsonString;
-            }
-            catch (Exception ex)
-            {
-                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inseperado. " + ex.Message, tipoMensaje = "Error" };
-
-                myJsonString = (new JavaScriptSerializer()).Serialize(objRespuesta);
-                return myJsonString;
             }
         }
 

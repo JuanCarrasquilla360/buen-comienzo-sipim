@@ -58,6 +58,7 @@
     <Compile Include="Administracion\Sedes.cs" />
     <Compile Include="Administracion\CoordinadorUbas.cs" />
     <Compile Include="Administracion\Ubas.cs" />
+    <Compile Include="BusquedaActiva\CronogramaBusquedaActiva.cs" />
     <Compile Include="Maestros\Escuchaderos.cs" />
     <Compile Include="Maestros\Procedimientos_SSR.cs" />
     <Compile Include="Maestros\ResultadoCitologia_SSR.cs" />
@@ -165,6 +166,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="NewFolder1\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
