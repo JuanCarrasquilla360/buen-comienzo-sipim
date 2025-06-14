@@ -156,13 +156,7 @@ namespace BuenComienzo
                 foreach (XmlElement submenu in nodo.ChildNodes)
                 {
                     string url = Path.GetFileName(submenu.GetAttribute("Pagina"));
-                    bool tienePermiso = Utilidades.TienePermiso(objUsuario.IdPerfil.Value, url);
-                    
-                    // Permitir acceso temporal a páginas de Búsqueda Activa mientras se configuran los permisos
-                    if (url == "CronogramaBusquedaActiva.aspx")
-                    {
-                        tienePermiso = true;
-                    }
+                    bool tienePermiso = Utilidades.TienePermiso(objUsuario.IdPerfil.Value, url);  
 
                     if (tienePermiso)
                     {
