@@ -60,13 +60,6 @@ namespace BuenComienzo
 
             Response.Write("<h2>Error</h2>\n");
             Response.Write("<p>Ha ocurrido un error inesperado. Por favor contacte al administrador del sistema</p>\n");
-            Response.Write("<h3>Detalles del Error:</h3>\n");
-            Response.Write("<p><strong>Mensaje:</strong> " + exc.Message + "</p>\n");
-            if (exc.InnerException != null)
-            {
-                Response.Write("<p><strong>Excepción interna:</strong> " + exc.InnerException.Message + "</p>\n");
-            }
-            Response.Write("<p><strong>Stack Trace:</strong><br/>" + exc.StackTrace.Replace("\n", "<br/>") + "</p>\n");
 
             Server.ClearError();
         }
