@@ -75,7 +75,7 @@
             <div class="row" style="padding: 4px 4px 4px 4px;">
                 <div class="col-sm-12">
                     <div class="col-sm-2">
-                        <label class="control-label">Agente educativo 1*</label>
+                        <label class="control-label">Psicosocial Transversal 1*</label>
                     </div>
                     <div class="col-sm-4">
                         <select class="form-control" aria-label="Default select" id="ddlAgenteEducativo1"
@@ -84,7 +84,7 @@
                         </select>
                     </div>
                     <div class="col-sm-2">
-                        <label class="control-label">Agente educativo 2</label>
+                        <label class="control-label">Psicosocial Transversal 2</label>
                     </div>
                     <div class="col-sm-4">
                         <select class="form-control" aria-label="Default select" id="ddlAgenteEducativo2">

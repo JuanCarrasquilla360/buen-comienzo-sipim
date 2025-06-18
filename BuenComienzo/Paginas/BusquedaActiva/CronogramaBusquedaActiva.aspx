@@ -163,7 +163,7 @@
                         "language": {
                             "url": "../../plugins/datatables/Spanish.json"
                         },
-                        'aoColumns': columnasJSON(['Id cronograma', 'Fecha encuentro', 'Coordinador', 'Tipo actividad', 'Actividad', 'Comuna', 'Barrio', 'Agente educativo 1', 'Agente educativo 2', 'Punto referencia', 'Observaciones', 'Motivo reprogramación', "Usuario creación", "Fecha creación", '']),
+                        'aoColumns': columnasJSON(['Id cronograma', 'Fecha encuentro', 'Coordinador', 'Tipo actividad', 'Actividad', 'Comuna', 'Barrio', 'Psicosocial Transversal 1', 'Psicosocial Transversal 2', 'Punto referencia', 'Observaciones', 'Motivo reprogramación', "Usuario creación", "Fecha creación", '']),
                         "bServerSide": true,
                         "sAjaxSource": "/Paginas/WebMethods.aspx/ConsultarCronogramaBusquedaActiva",
                         "drawCallback": function (settings) {
@@ -336,7 +336,37 @@
                     console.log("successPopup llamado con nuevo=" + nuevo);
 
                     if (nuevo == 'S') {
-                       
+                        // Inicializar correctamente TODOS los campos dropdown para evitar problemas de codificación
+                        
+                        // Coordinador
+                        $(window.parent.document).find('#ddlCoordinador').empty();
+                        $(window.parent.document).find('#ddlCoordinador').append('<option value="">Seleccione una opción</option>');
+                        
+                        // Agentes educativos
+                        $(window.parent.document).find('#ddlAgenteEducativo1').empty();
+                        $(window.parent.document).find('#ddlAgenteEducativo1').append('<option value="">Seleccione una opción</option>');
+                        
+                        $(window.parent.document).find('#ddlAgenteEducativo2').empty();
+                        $(window.parent.document).find('#ddlAgenteEducativo2').append('<option value="">Seleccione una opción</option>');
+                        $(window.parent.document).find('#ddlAgenteEducativo2').prop('disabled', true);
+                        
+                        // Actividades y tipo de actividades
+                        $(window.parent.document).find('#ddlActividades').empty();
+                        $(window.parent.document).find('#ddlActividades').append('<option value="">Seleccione una opción</option>');
+                        
+                        $(window.parent.document).find('#ddlTipoActividades').empty();
+                        $(window.parent.document).find('#ddlTipoActividades').append('<option value="">Seleccione una opción</option>');
+                        
+                        // Comuna y Barrio
+                        $(window.parent.document).find('#ddlComuna').empty();
+                        $(window.parent.document).find('#ddlComuna').append('<option value="">Seleccione una opción</option>');
+                        
+                        $(window.parent.document).find('#ddlBarrio').empty();
+                        $(window.parent.document).find('#ddlBarrio').append('<option value="">Seleccione una opción</option>');
+                        
+                        // Motivo de reprogramación
+                        $(window.parent.document).find('#ddlMotivoReprogramacion').empty();
+                        $(window.parent.document).find('#ddlMotivoReprogramacion').append('<option value="">Seleccione una opción</option>');
 
                         console.log("Ejecutando cargarCoordinadores...");
                         cargarCoordinadores();
@@ -394,12 +424,32 @@
                             console.log("tipoActividad",tipoActividad, e.target.value);
 
                             $(window.parent.document).find("#ddlAgenteEducativo1").val('');
-                            $(window.parent.document).find("#ddlAgenteEducativo2").val('');
+                            $(window.parent.document).find("#ddlAgenteEducativo2").val('').prop('disabled', true);
                             $(window.parent.document).find("#ddlSedes").val('');
-
 
                             cargarComunas();
                             cargarCoordinadorAgentes();
+                        });
+
+                        // Configurar evento para el primer agente educativo
+                        $(window.parent.document).find("#ddlAgenteEducativo1").on('change', function () {
+                            var agente1Seleccionado = $(this).val();
+                            var $agente2 = $(window.parent.document).find("#ddlAgenteEducativo2");
+                            
+                            if (agente1Seleccionado !== '') {
+                                // Habilitar el segundo dropdown
+                                $agente2.prop('disabled', false);
+                                
+                                // Limpiar selección del segundo agente
+                                $agente2.val('');
+                                
+                                // Filtrar opciones del segundo agente (excluir el agente 1 seleccionado)
+                                filtrarAgentesSegundo(agente1Seleccionado);
+                            } else {
+                                // Deshabilitar el segundo dropdown si no hay agente 1 seleccionado
+                                $agente2.prop('disabled', true).val('');
+                                restaurarOpcionesAgentesSegundo();
+                            }
                         });
 
                         console.log("Configurando date picker...");
@@ -478,7 +528,7 @@
                                     var datos = JSON.parse(datosJson.mensaje);
 
                                     // Cargar coordinadores y datos dependientes con los valores del registro
-                                    cargarCoordinadores(datos[0].idCoordinador, null, null, datos[0].idAgenteEducativo1, datos[0].idAgenteEducativo2);
+                                    cargarCoordinadores(datos[0].idCoordinador, null, null, datos[0].idAgenteEducativo1, datos[0].idAgenteEducativo2, 'edicion');
 
                                     // Cargar tipo de actividad y actividad
                                     cargarTipoActividad(datos[0].idTipoActividad, datos[0].idActividad);
@@ -542,6 +592,27 @@
 
                                         cargarComunas(datos[0].idComuna, datos[0].idBarrio);
                                     }
+
+                                    // Configurar evento para el primer agente educativo en modo edición
+                                    $(window.parent.document).find("#ddlAgenteEducativo1").on('change', function () {
+                                        var agente1Seleccionado = $(this).val();
+                                        var $agente2 = $(window.parent.document).find("#ddlAgenteEducativo2");
+                                        
+                                        if (agente1Seleccionado !== '') {
+                                            // Habilitar el segundo dropdown
+                                            $agente2.prop('disabled', false);
+                                            
+                                            // Limpiar selección del segundo agente
+                                            $agente2.val('');
+                                            
+                                            // Filtrar opciones del segundo agente (excluir el agente 1 seleccionado)
+                                            filtrarAgentesSegundo(agente1Seleccionado);
+                                        } else {
+                                            // Deshabilitar el segundo dropdown si no hay agente 1 seleccionado
+                                            $agente2.prop('disabled', true).val('');
+                                            restaurarOpcionesAgentesSegundo();
+                                        }
+                                    });
 
                                     // Deshabilitar TODOS los campos para edición (solo permitir reprogramación)
                                     $(window.parent.document).find("#ddlCoordinador").prop("disabled", true);
@@ -621,7 +692,7 @@
                     }
                 }
 
-                function cargarCoordinadores(idCoordinador, idsede, idUbas, idAgente1, idAgente2) {
+                function cargarCoordinadores(idCoordinador, idsede, idUbas, idAgente1, idAgente2, modo) {
 
                     var jsonInput = "{ esTraslado: '" + 'N' + "' }";
                     var obj = eval("(" + jsonInput + ')');
@@ -637,7 +708,7 @@
                         success: function (resultado) {                          // función que va a ejecutar si el pedido fue exitoso
                             const data = JSON.parse(resultado.d);
                             $(window.parent.document).find('#ddlCoordinador').empty();
-                            $(window.parent.document).find('#ddlCoordinador').append('<option value="' + '' + '" selected>Seleccione una opción</option>');
+                            $(window.parent.document).find('#ddlCoordinador').append('<option value="">Seleccione una opción</option>');
 
                             if (data.resultado) {
                                 const informacion = JSON.parse(data.mensaje);
@@ -649,7 +720,7 @@
                                 if (idCoordinador != null) {
                                     $(window.parent.document).find('#ddlCoordinador').val(idCoordinador);
 
-                                    cargarCoordinadorAgentes(idAgente1, idAgente2);
+                                    cargarCoordinadorAgentes(idAgente1, idAgente2, modo);
                                 }
                                 else {
                                  
@@ -671,8 +742,11 @@
                 }
 
 
+                // Variable global para almacenar todos los agentes disponibles
+                var todosLosAgentes = [];
+
                 // con este cargamos los tipos de uba que tenemos en el sistema
-                function cargarCoordinadorAgentes(idAgente1, idAgente2) {
+                function cargarCoordinadorAgentes(idAgente1, idAgente2, modo) {
 
                     var idCoordinador = $('#ddlCoordinador', parent.document).val()
                     console.log("idCoordinador que se envía:", idCoordinador);
@@ -692,13 +766,16 @@
                             console.log("DATA",data);
                             
                             $(window.parent.document).find('#ddlAgenteEducativo1').empty();
-                            $(window.parent.document).find('#ddlAgenteEducativo1').append('<option value="' + '' + '" selected>Seleccione una opción</option>');
+                            $(window.parent.document).find('#ddlAgenteEducativo1').append('<option value="">Seleccione una opción</option>');
 
                             $(window.parent.document).find('#ddlAgenteEducativo2').empty();
-                            $(window.parent.document).find('#ddlAgenteEducativo2').append('<option value="' + '' + '" selected>Seleccione una opción</option>');
+                            $(window.parent.document).find('#ddlAgenteEducativo2').append('<option value="">Seleccione una opción</option>');
 
                             if (data.resultado) {
                                 const informacion = JSON.parse(data.mensaje);
+                                
+                                // Guardar todos los agentes en la variable global
+                                todosLosAgentes = informacion;
 
                                 $.each(informacion, function (index, value) {
                                     $(window.parent.document).find('#ddlAgenteEducativo1').append('<option value="' + value.idAgente + '">' + value.nombre + '</option>');
@@ -708,6 +785,14 @@
                                 if (idAgente1 != null) {
                                     $(window.parent.document).find('#ddlAgenteEducativo1').val(idAgente1);
                                     $(window.parent.document).find('#ddlAgenteEducativo2').val(idAgente2);
+                                    
+                                    // Solo habilitar el segundo dropdown si NO estamos en modo edición
+                                    if (idAgente1 !== '' && modo !== 'edicion') {
+                                        $(window.parent.document).find('#ddlAgenteEducativo2').prop('disabled', false);
+                                    }
+                                } else {
+                                    // Si es nuevo, deshabilitar el segundo agente inicialmente
+                                    $(window.parent.document).find('#ddlAgenteEducativo2').prop('disabled', true);
                                 }
                             }
 
@@ -716,6 +801,36 @@
                             error = true;
                             alerta('Ha ocurrido un error inesperado. Por favor contacte al administrador del sistema. ' + XMLHttpRequest.responseText, 'Error');
                         }
+                    });
+                }
+
+                // Función para filtrar las opciones del segundo agente excluyendo el agente 1 seleccionado
+                function filtrarAgentesSegundo(idAgenteExcluir) {
+                    var $agente2 = $(window.parent.document).find('#ddlAgenteEducativo2');
+                    
+                    // Limpiar el dropdown
+                    $agente2.empty();
+                    $agente2.append('<option value="">Seleccione una opción</option>');
+                    
+                    // Agregar solo los agentes que no son el agente 1 seleccionado
+                    $.each(todosLosAgentes, function (index, value) {
+                        if (value.idAgente !== idAgenteExcluir) {
+                            $agente2.append('<option value="' + value.idAgente + '">' + value.nombre + '</option>');
+                        }
+                    });
+                }
+
+                // Función para restaurar todas las opciones del segundo agente
+                function restaurarOpcionesAgentesSegundo() {
+                    var $agente2 = $(window.parent.document).find('#ddlAgenteEducativo2');
+                    
+                    // Limpiar el dropdown
+                    $agente2.empty();
+                    $agente2.append('<option value="">Seleccione una opción</option>');
+                    
+                    // Agregar todos los agentes
+                    $.each(todosLosAgentes, function (index, value) {
+                        $agente2.append('<option value="' + value.idAgente + '">' + value.nombre + '</option>');
                     });
                 }
 
@@ -739,7 +854,7 @@
                             if (data.resultado) {
                                 const informacion = JSON.parse(data.mensaje);
                                 $(control).empty();
-                                $(control).append('<option value="' + '' + '">Seleccione una opción</option>');
+                                $(control).append('<option value="">Seleccione una opción</option>');
 
                                 $.each(informacion, function (index, value) {
                                     $(control).append('<option value="' + value.IdGeneralidad + '">' + value.Descripcion + '</option>');
@@ -771,7 +886,7 @@
                             if (data.resultado) {
                                 const informacion = JSON.parse(data.mensaje);
                                 $(parent.document).find('#ddlComuna').empty();
-                                $(parent.document).find('#ddlComuna').append('<option value="' + '' + '">Seleccione una opción</option>');
+                                $(parent.document).find('#ddlComuna').append('<option value="">Seleccione una opción</option>');
 
                                 $.each(informacion, function (index, value) {
                                     $(parent.document).find('#ddlComuna').append('<option value="' + value.IdComuna + '">' + value.NombreComuna + '</option>');
@@ -813,7 +928,7 @@
                             if (data.resultado) {
                                 const informacion = JSON.parse(data.mensaje);
                                 $(parent.document).find('#ddlBarrio').empty();
-                                $(parent.document).find('#ddlBarrio').append('<option value="' + '' + '" selected>Seleccione una opción</option>');
+                                $(parent.document).find('#ddlBarrio').append('<option value="">Seleccione una opción</option>');
 
                                 $.each(informacion, function (index, value) {
                                     $(parent.document).find('#ddlBarrio').append('<option value="' + value.IdBarrio + '">' + value.NombreBarrio + '</option>');

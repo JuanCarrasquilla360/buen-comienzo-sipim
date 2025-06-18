@@ -3418,7 +3418,7 @@ namespace BuenComienzo.Paginas
             try
             {
                 CronogramaBusquedaActiva objCronogramaBusquedaActiva = new CronogramaBusquedaActiva();
-            string[] campos = new string[] { "IdCronograma", "FechaEncuentro", "Coordinador", "TipoActividad", "Actividad", "Comuna", "Barrio", "AgenteEducativo1", "AgenteEducativo2", "PuntoReferencia", "Observaciones", "MotivoReprogramacion", "UsuarioCreacion", "FechaCreacion" };
+            string[] campos = new string[] { "IdCronograma", "FechaEncuentroFormatted", "Coordinador", "TipoActividad", "Actividad", "Comuna", "Barrio", "AgenteEducativo1", "AgenteEducativo2", "PuntoReferencia", "Observaciones", "MotivoReprogramacion", "UsuarioCreacion", "FechaCreacion" };
             int sEcho = Utilidades.ToInt(HttpContext.Current.Request.Params["sEcho"]);
             int iDisplayLength = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayLength"]);
             int iDisplayStart = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayStart"]);
@@ -3430,12 +3430,12 @@ namespace BuenComienzo.Paginas
 
             if (!string.IsNullOrEmpty(rawSearch) && rawSearch.Length > 0)
             {
-                sb.Append(" WHERE ");
                 for (int i = 0; i < campos.Length; i++)
                 {
-                    sb.Append((i == 0) ? campos[i] + " LIKE " : " OR " + campos[i] + " LIKE ");
+                    sb.Append((i == 0) ? "(" + campos[i] + " LIKE " : " OR " + campos[i] + " LIKE ");
                     sb.Append(wrappedSearch);
                 }
+                sb.Append(")");
 
                 filteredWhere = sb.ToString();
             }
