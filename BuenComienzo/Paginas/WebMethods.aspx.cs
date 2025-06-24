@@ -6312,5 +6312,312 @@ namespace BuenComienzo.Paginas
 
         #endregion
 
+        #region Caracterización Búsqueda Activa
+
+        [WebMethod(EnableSession = true)]
+        [ScriptMethod(UseHttpGet = true)]
+        public static string ConsultarCaracterizacionBusquedaActiva()
+        {
+            BuenComienzo.Core.BusquedaActiva.CaracterizacionBusquedaActiva objCaracterizacionBusqueda = new BuenComienzo.Core.BusquedaActiva.CaracterizacionBusquedaActiva();
+            string[] campos = new string[] { "FechaHora", "NumeroIdentificacion", "PrimerNombre", "SegundoNombre", 
+                "PrimerApellido", "SegundoApellido", "FechaNacimiento", "Celular", "TelefonoFijo", "Comuna", "Barrio" };
+            
+            int sEcho = Utilidades.ToInt(HttpContext.Current.Request.Params["sEcho"]);
+            int iDisplayLength = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayLength"]);
+            int iDisplayStart = Utilidades.ToInt(HttpContext.Current.Request.Params["iDisplayStart"]);
+            string rawSearch = HttpContext.Current.Request.Params["sSearch"];
+
+            var sb = new StringBuilder();
+            var filteredWhere = string.Empty;
+            var wrappedSearch = "'%" + rawSearch + "%'";
+
+            if (!string.IsNullOrEmpty(rawSearch) && rawSearch.Length > 0)
+            {
+                sb.Append(" WHERE ");
+                for (int i = 0; i < campos.Length; i++)
+                {
+                    sb.Append((i == 0) ? campos[i] + " LIKE " : " OR " + campos[i] + " LIKE ");
+                    sb.Append(wrappedSearch);
+                }
+                filteredWhere = sb.ToString();
+            }
+
+            string orderByClause = campos[(Utilidades.ToInt(HttpContext.Current.Request.Params["iSortCol_0"]))] + " " + HttpContext.Current.Request.Params["sSortDir_0"];
+            sb.Clear();
+
+            var numberOfRowsToReturn = "";
+            numberOfRowsToReturn = iDisplayLength == -1 ? "TotalRows" : (iDisplayStart + iDisplayLength).ToString();
+
+            DataTable dtDatos = objCaracterizacionBusqueda.ConsultarCaracterizacionBusquedaActiva(orderByClause, filteredWhere, iDisplayStart, numberOfRowsToReturn);
+
+            var totalDisplayRecords = "";
+            var totalRecords = "";
+            string outputJson = string.Empty;
+            var rowClass = "";
+            var count = 0;
+
+            // Validar que dtDatos no sea null y tenga filas
+            if (dtDatos == null || dtDatos.Rows.Count == 0)
+            {
+                sb.Append("{");
+                sb.Append(@"""sEcho"": ");
+                sb.AppendFormat(@"""{0}""", sEcho);
+                sb.Append(",");
+                sb.Append(@"""iTotalRecords"": 0");
+                sb.Append(",");
+                sb.Append(@"""iTotalDisplayRecords"": 0");
+                sb.Append(", ");
+                sb.Append(@"""aaData"": [ ");
+                sb.Append("]}");
+                outputJson = sb.ToString();
+                return outputJson;
+            }
+
+            foreach (DataRow fila in dtDatos.Rows)
+            {
+                if (totalRecords.Length == 0)
+                {
+                    totalRecords = fila["TotalRows"].ToString();
+                    totalDisplayRecords = fila["TotalDisplayRows"].ToString();
+                }
+
+                sb.Append("{");
+                sb.AppendFormat(@"""DT_RowId"": ""{0}""", count++);
+                sb.Append(",");
+                sb.AppendFormat(@"""DT_RowClass"": ""{0}""", rowClass);
+                sb.Append(",");
+
+                for (int i = 0; i < campos.Length; i++)
+                {
+                    if (i != 0)
+                        sb.Append(",");
+                    sb.AppendFormat(@"""{0}"": ""{1}""", i.ToString(), fila[campos[i]].ToString().Replace("\"", "\\\""));
+                }
+
+                sb.Append(",");
+                string btnBotones = @"<div style='text-align: center;'><span class='ion-edit icono-grid' title='Editar' onclick=\""Editar('" + fila["NumeroIdentificacion"].ToString() + @"', 'N'); return false;\"" ></span>&nbsp;<span class='ion-trash-b icono-grid' title='Eliminar' onclick=\""Eliminar('" + fila["NumeroIdentificacion"].ToString() + @"'); return false;\"" ></span></div>";
+
+                sb.AppendFormat(@"""{0}"": ""{1}""", campos.Length, btnBotones);
+                sb.Append("},");
+            }
+
+            if (totalRecords.Length == 0)
+            {
+                sb.Append("{");
+                sb.Append(@"""sEcho"": ");
+                sb.AppendFormat(@"""{0}""", sEcho);
+                sb.Append(",");
+                sb.Append(@"""iTotalRecords"": 0");
+                sb.Append(",");
+                sb.Append(@"""iTotalDisplayRecords"": 0");
+                sb.Append(", ");
+                sb.Append(@"""aaData"": [ ");
+                sb.Append("]}");
+                outputJson = sb.ToString();
+                return outputJson;
+            }
+
+            outputJson = sb.Remove(sb.Length - 1, 1).ToString();
+            sb.Clear();
+
+            sb.Append("{");
+            sb.Append(@"""sEcho"": ");
+            sb.AppendFormat(@"""{0}""", sEcho);
+            sb.Append(",");
+            sb.Append(@"""iTotalRecords"": ");
+            sb.Append(totalRecords);
+            sb.Append(",");
+            sb.Append(@"""iTotalDisplayRecords"": ");
+            sb.Append(totalDisplayRecords);
+            sb.Append(", ");
+            sb.Append(@"""aaData"": [ ");
+            sb.Append(outputJson);
+            sb.Append("]}");
+            outputJson = sb.ToString();
+
+            return outputJson;
+        }
+
+        [WebMethod]
+        public static string ObtenerCaracterizacionBusquedaActiva(string numeroIdentificacion)
+        {
+            RespuestaTO objRespuesta = new RespuestaTO();
+            try
+            {
+                BuenComienzo.Core.BusquedaActiva.CaracterizacionBusquedaActiva objCaracterizacion = new BuenComienzo.Core.BusquedaActiva.CaracterizacionBusquedaActiva();
+
+                DataTable dtDatos = objCaracterizacion.ObtenerCaracterizacionBusquedaActiva(numeroIdentificacion);
+
+                if (dtDatos != null && dtDatos.Rows.Count > 0)
+                {
+                    objRespuesta.resultado = true;
+
+                    var listaCaracterizacion = (from DataRow dr in dtDatos.Rows
+                                                select new
+                                                {
+                                                    fechaHora = DateTime.Parse(dr["FechaHora"].ToString()).ToString("yyyy-MM-ddTHH:mm"),
+                                                    fechaNacimiento = DateTime.Parse(dr["FechaNacimiento"].ToString()).ToString("yyyy-MM-dd"),
+                                                    idTipoDocumento = dr["IdTipoDocumento"].ToString(),
+                                                    numeroIdentificacion = dr["NumeroIdentificacion"].ToString(),
+                                                    primerNombre = dr["PrimerNombre"].ToString(),
+                                                    segundoNombre = dr["SegundoNombre"].ToString(),
+                                                    primerApellido = dr["PrimerApellido"].ToString(),
+                                                    segundoApellido = dr["SegundoApellido"].ToString(),
+                                                    coordenadax = dr["Coordenadax"].ToString(),
+                                                    coordenaday = dr["Coordenaday"].ToString(),
+                                                    idComuna = dr["IdComuna"].ToString(),
+                                                    idBarrio = dr["IdBarrio"].ToString(),
+                                                    idTipoParticipante = dr["IdTipoParticipante"].ToString(),
+                                                    idGenero = dr["IdGenero"].ToString(),
+                                                    telefono = dr["Telefono"].ToString(),
+                                                    telefono2 = dr["Telefono2"].ToString(),
+                                                    idDiscapacidad = dr["IdDiscapacidad"].ToString(),
+                                                    idInstitucionalizado = dr["IdInstitucionalizado"].ToString(),
+                                                    idInstitucionalizadoCual = dr["IdInstitucionalizadoCual"].ToString(),
+                                                    idRealizadEnFestival = dr["IdRealizadEnFestival"].ToString(),
+                                                    observaciones = dr["Observaciones"].ToString(),
+                                                    firma = dr["Firma"].ToString(),
+                                                    evidenciaRegistro = dr["EvidenciaRegistro"].ToString()
+                                                }).ToList();
+
+                    objRespuesta.mensaje = JsonConvert.SerializeObject(listaCaracterizacion);
+                }
+                string resultado = JsonConvert.SerializeObject(objRespuesta);
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + ex.Message, tipoMensaje = "Error" };
+                string resultado = JsonConvert.SerializeObject(objRespuesta);
+                return resultado;
+            }
+        }
+
+        [WebMethod(EnableSession = true)]
+        public static string ActualizarCaracterizacionBusquedaActiva(string nuevo, string fechaHora, string fechaNacimiento, 
+            string idTipoDocumento, string numeroIdentificacion, string primerNombre, string segundoNombre, 
+            string primerApellido, string segundoApellido, string coordenadax, string coordenaday, string idComuna, 
+            string idBarrio, string idTipoParticipante, string idGenero, string telefono, string telefono2, 
+            string idDiscapacidad, string idInstitucionalizado, string idInstitucionalizadoCual, 
+            string idRealizadEnFestival, string observaciones, string firma, string evidenciaRegistro)
+        {
+            BuenComienzo.Core.BusquedaActiva.CaracterizacionBusquedaActiva objCaracterizacion = new BuenComienzo.Core.BusquedaActiva.CaracterizacionBusquedaActiva();
+            RespuestaTO objRespuesta;
+            string myJsonString;
+            string idUsuarioCreacion = ((UsuarioTO)HttpContext.Current.Session[VariablesSession.DatosUsuario]).IdDocumento;
+            DateTime pFechaHora = DateTime.Parse(fechaHora);
+            DateTime pFechaNacimiento = DateTime.Parse(fechaNacimiento);
+
+            try
+            {
+                // Validar que la fecha de focalización sea del mes actual
+                if (pFechaHora.Month != DateTime.Now.Month || pFechaHora.Year != DateTime.Now.Year)
+                {
+                    objRespuesta = new RespuestaTO() { resultado = false, mensaje = "La fecha de focalización debe ser del mes actual", tipoMensaje = "Advertencia" };
+                    myJsonString = JsonConvert.SerializeObject(objRespuesta);
+                    return myJsonString;
+                }
+
+                // Validar que la fecha de nacimiento no sea superior a la actual
+                if (pFechaNacimiento > DateTime.Now.Date)
+                {
+                    objRespuesta = new RespuestaTO() { resultado = false, mensaje = "La fecha de nacimiento no puede ser superior a la fecha actual", tipoMensaje = "Advertencia" };
+                    myJsonString = JsonConvert.SerializeObject(objRespuesta);
+                    return myJsonString;
+                }
+
+                // Limpiar observaciones
+                if (!string.IsNullOrEmpty(observaciones))
+                {
+                    observaciones = observaciones.Replace("\r\n", " ").Replace("\n", " ").Replace("\t", " ").Trim();
+                    while (observaciones.Contains("  "))
+                        observaciones = observaciones.Replace("  ", " ");
+                }
+
+                if (nuevo == "S")
+                {
+                    // Validar que no exista el documento
+                    if (objCaracterizacion.ValidarDocumentoExiste(numeroIdentificacion))
+                    {
+                        objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ya existe una caracterización con ese número de identificación", tipoMensaje = "Advertencia" };
+                        myJsonString = JsonConvert.SerializeObject(objRespuesta);
+                        return myJsonString;
+                    }
+
+                    if (objCaracterizacion.InsertarCaracterizacionBusquedaActiva(
+                        pFechaHora, pFechaNacimiento, idTipoDocumento, numeroIdentificacion, primerNombre, segundoNombre,
+                        primerApellido, segundoApellido, coordenadax, coordenaday, idComuna, idBarrio, idTipoParticipante,
+                        idGenero, telefono, telefono2, idDiscapacidad, idInstitucionalizado, idInstitucionalizadoCual,
+                        idRealizadEnFestival, observaciones, firma, evidenciaRegistro, idUsuarioCreacion))
+                        objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se insertó la caracterización satisfactoriamente", tipoMensaje = "Exito" };
+                    else
+                        objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + objCaracterizacion.Error, tipoMensaje = "Error" };
+                }
+                else
+                {
+                    if (objCaracterizacion.ActualizarCaracterizacionBusquedaActiva(numeroIdentificacion, pFechaHora, pFechaNacimiento,
+                        idTipoDocumento, primerNombre, segundoNombre, primerApellido, segundoApellido, coordenadax, coordenaday,
+                        idComuna, idBarrio, idTipoParticipante, idGenero, telefono, telefono2, idDiscapacidad,
+                        idInstitucionalizado, idInstitucionalizadoCual, idRealizadEnFestival, observaciones, firma,
+                        evidenciaRegistro, idUsuarioCreacion))
+                        objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se actualizó la caracterización satisfactoriamente", tipoMensaje = "Exito" };
+                    else
+                        objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + objCaracterizacion.Error, tipoMensaje = "Error" };
+                }
+
+                myJsonString = JsonConvert.SerializeObject(objRespuesta);
+                return myJsonString;
+            }
+            catch (Exception ex)
+            {
+                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + ex.Message, tipoMensaje = "Error" };
+                myJsonString = JsonConvert.SerializeObject(objRespuesta);
+                return myJsonString;
+            }
+        }
+
+        [WebMethod(EnableSession = true)]
+        public static string EliminarCaracterizacionBusquedaActiva(string numeroIdentificacion)
+        {
+            BuenComienzo.Core.BusquedaActiva.CaracterizacionBusquedaActiva objCaracterizacion = new BuenComienzo.Core.BusquedaActiva.CaracterizacionBusquedaActiva();
+            RespuestaTO objRespuesta;
+            string myJsonString;
+
+            try
+            {
+                if (objCaracterizacion.EliminarCaracterizacionBusquedaActiva(numeroIdentificacion))
+                    objRespuesta = new RespuestaTO() { resultado = true, mensaje = "Se eliminó la caracterización satisfactoriamente", tipoMensaje = "Exito" };
+                else
+                    objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + objCaracterizacion.Error, tipoMensaje = "Error" };
+
+                myJsonString = JsonConvert.SerializeObject(objRespuesta);
+                return myJsonString;
+            }
+            catch (Exception ex)
+            {
+                objRespuesta = new RespuestaTO() { resultado = false, mensaje = "Ha ocurrido un error inesperado. " + ex.Message, tipoMensaje = "Error" };
+                myJsonString = JsonConvert.SerializeObject(objRespuesta);
+                return myJsonString;
+            }
+        }
+
+        [WebMethod(EnableSession = true)]
+        public static string InsertarCaracterizacionBusquedaActiva(string FechaHora, string FechaNacimiento, 
+            string IdTipoDocumento, string NumeroIdentificacion, string PrimeroNombre, string SegundoNombre, 
+            string PrimerApellido, string SegundoApellido, string Coordenadax, string Coordenaday, string IdComuna, 
+            string IdBarrio, string IdTipoParticipante, string IdGenero, string Telefono, string Telefono2, 
+            string IdDiscapacidad, string IdInstitucionalizado, string IdInstitucionalizadoCual, 
+            string IdRealizadEnFestival, string Observaciones, string Firma, string EvidenciaRegistro)
+        {
+            // Llamar al método ActualizarCaracterizacionBusquedaActiva con nuevo = "S"
+            return ActualizarCaracterizacionBusquedaActiva("S", FechaHora, FechaNacimiento, IdTipoDocumento, 
+                NumeroIdentificacion, PrimeroNombre, SegundoNombre, PrimerApellido, SegundoApellido, 
+                Coordenadax, Coordenaday, IdComuna, IdBarrio, IdTipoParticipante, IdGenero, Telefono, 
+                Telefono2, IdDiscapacidad, IdInstitucionalizado, IdInstitucionalizadoCual, 
+                IdRealizadEnFestival, Observaciones, Firma, EvidenciaRegistro);
+        }
+
+        #endregion
+
     }
 }

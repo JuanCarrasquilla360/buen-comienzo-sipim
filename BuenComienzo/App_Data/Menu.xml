@@ -41,5 +41,6 @@
   
   <BusquedaActiva Nombre="Búsqueda Activa" Clase="fa fa-search">
     <item Nombre="Cronograma" Pagina="BusquedaActiva/CronogramaBusquedaActiva.aspx" />
+    <item Nombre="Caracterización Búsqueda Activa" Pagina="BusquedaActiva/CaracterizacionBusquedaActiva.aspx" />
   </BusquedaActiva>
 </Menu>

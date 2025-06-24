@@ -193,7 +193,9 @@
     <Content Include="Paginas\Remision\Popups\EditarRemisionInterna.aspx" />
     <Content Include="Paginas\Remision\RemisionesPendientes.aspx" />
     <Content Include="Paginas\BusquedaActiva\CronogramaBusquedaActiva.aspx" />
+    <Content Include="Paginas\BusquedaActiva\CaracterizacionBusquedaActiva.aspx" />
     <Content Include="Paginas\BusquedaActiva\Popups\EditarCronogramaBusquedaActiva.aspx" />
+    <Content Include="Paginas\BusquedaActiva\Popups\EditarCaracterizacionBusquedaActiva.aspx" />
     <Content Include="Paginas\WebMethods.aspx" />
     <Content Include="plugins\AutomaticRowSpan\index.html" />
     <Content Include="plugins\AutomaticRowSpan\jquery.rowspanizer.js" />
@@ -1413,12 +1415,26 @@
     <Compile Include="Paginas\BusquedaActiva\CronogramaBusquedaActiva.aspx.designer.cs">
       <DependentUpon>CronogramaBusquedaActiva.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Paginas\BusquedaActiva\CaracterizacionBusquedaActiva.aspx.cs">
+      <DependentUpon>CaracterizacionBusquedaActiva.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Paginas\BusquedaActiva\CaracterizacionBusquedaActiva.aspx.designer.cs">
+      <DependentUpon>CaracterizacionBusquedaActiva.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Paginas\BusquedaActiva\Popups\EditarCronogramaBusquedaActiva.aspx.cs">
       <DependentUpon>EditarCronogramaBusquedaActiva.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Paginas\BusquedaActiva\Popups\EditarCronogramaBusquedaActiva.aspx.designer.cs">
       <DependentUpon>EditarCronogramaBusquedaActiva.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\BusquedaActiva\Popups\EditarCaracterizacionBusquedaActiva.aspx.cs">
+      <DependentUpon>EditarCaracterizacionBusquedaActiva.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Paginas\BusquedaActiva\Popups\EditarCaracterizacionBusquedaActiva.aspx.designer.cs">
+      <DependentUpon>EditarCaracterizacionBusquedaActiva.aspx</DependentUpon>
     </Compile>
     <Compile Include="Paginas\WebMethods.aspx.cs">
       <DependentUpon>WebMethods.aspx</DependentUpon>

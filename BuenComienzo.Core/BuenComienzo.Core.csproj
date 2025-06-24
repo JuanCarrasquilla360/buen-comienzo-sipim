@@ -59,6 +59,7 @@
     <Compile Include="Administracion\CoordinadorUbas.cs" />
     <Compile Include="Administracion\Ubas.cs" />
     <Compile Include="BusquedaActiva\CronogramaBusquedaActiva.cs" />
+    <Compile Include="BusquedaActiva\CaracterizacionBusquedaActiva.cs" />
     <Compile Include="Maestros\Escuchaderos.cs" />
     <Compile Include="Maestros\Procedimientos_SSR.cs" />
     <Compile Include="Maestros\ResultadoCitologia_SSR.cs" />
